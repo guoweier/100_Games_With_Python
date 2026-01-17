@@ -1,4 +1,4 @@
-![Ohhh! Sheep]()
+![Ohhh! Sheep]("tutorial/banner.png")
 # Ohhh! Sheep: Recreated with Python
 
 ## Project Structure
