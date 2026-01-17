@@ -1,7 +1,6 @@
 import pygame
 import random
 import math 
-from collections import Counter
 
 # --------- CONFIG ----------- #
 SCREEN_WIDTH = 450
