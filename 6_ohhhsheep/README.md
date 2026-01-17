@@ -1,21 +1,23 @@
-![Flappy Bird](image/banner.png)
-# Flappy Bird: Recreated with Python 
+![Ohhh! Sheep]()
+# Ohhh! Sheep: Recreated with Python
 
 ## Project Structure
 
 ```
 color-by-number/
-|── font/                   # fonts
-|── image/                  # assets, images, etc
-│── flappybird.py           # main game script
+|── aseprite/               # images creating files
+│── assets/                 # buttons, images, etc
+|── music/                  # music for the game
+|── tutorial/               # line-by-line explanation of scripts
+│── ohhhsheep.py            # main game script
 │── README.md
 ```
 
 ## How to use
 ### 1. Download the project
 **Option A — Download ONLY this folder**<br>
-If you want just the Flappy Bird project (not the entire GameHut repo):
-1. Copy this folder link: https://github.com/guoweier/GameHut/tree/main/4_flappybird
+If you want just the Ohhh! Sheep project (not the entire GameHut repo):
+1. Copy this folder link: https://github.com/guoweier/GameHut/tree/main/6_ohhhsheep
 2. Go to: https://download-directory.github.io/
 3. Paste → download ZIP
 4. Unzip and open the folder
@@ -27,7 +29,7 @@ Click the green Code button → Download ZIP.<br>
 Or clone:<br>
 ```
 git clone https://github.com/guoweier/GameHut.git
-cd GameHut/4_flappybird
+cd GameHut/6_ohhhsheep
 ```
 
 ### 2. Requirements
@@ -36,22 +38,22 @@ cd GameHut/4_flappybird
 
 Install required libraries:
 ```
-pip install pygame 
+pip install pygame
 ```
 
 ### 3. Run the Game
 **Mac / Linux**
 ```
-python3 flappybird.py 
+python3 ohhhsheep.py
 ```
 
 **Windows**
 ```
-python flappybird.py 
+python ohhhsheep.py
 ```
 If Windows opens the Microsoft Store or shows Python errors:<br>
 ```
-py flappybird.py 
+py ohhhsheep.py
 ```
 
 ## Support

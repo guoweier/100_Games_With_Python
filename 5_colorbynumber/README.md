@@ -61,4 +61,4 @@ py color_by_number.py
 
 ## Support
 If you enjoy this project, please consider starring the repo ⭐️ <br>
-It helps support GameHut and encourages future mini-games!
+It helps support 100_GAMES_WITH_PYTHON and encourages future mini-games!
