@@ -9,3 +9,5 @@
 4. [Flappy Bird](https://github.com/guoweier/GameHut/tree/main/4_flappybird)
 
 5. [Color By Number](https://github.com/guoweier/GameHut/tree/main/5_colorbynumber)
+
+6. [Ohhh! Sheep](https://github.com/guoweier/GameHut/tree/main/6_ohhhsheep)
