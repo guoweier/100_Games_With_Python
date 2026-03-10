@@ -5,7 +5,6 @@
 
 ```
 color-by-number/
-|── aseprite/               # images creating files
 │── assets/                 # buttons, images, etc
 |── music/                  # music for the game
 |── tutorial/               # line-by-line explanation of scripts
