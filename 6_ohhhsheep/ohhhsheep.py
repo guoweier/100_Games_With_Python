@@ -2,6 +2,8 @@
 import pygame
 import math
 import random
+import os
+import sys
 
 
 # --- CONFIG --- #
@@ -317,10 +319,24 @@ class StackItem:
 
 
 # --- FUNCTIONS --- #
+if getattr(sys, "frozen", False):
+    BASE_DIR = (
+        getattr(sys, "_MEIPASS", None)
+        or os.environ.get("RESOURCEPATH")
+        or os.path.abspath(os.path.join(os.path.dirname(sys.executable), "..", "Resources"))
+    )
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def resource_path(relative_path):
+    return os.path.join(BASE_DIR, relative_path)
+
+
 def load_images_scaled(paths, size):
     out = []
     for p in paths:
-        img = pygame.image.load(p).convert_alpha()
+        img = pygame.image.load(resource_path(p)).convert_alpha()
         if img.get_width() != size[0] or img.get_height() != size[1]:
             img = pygame.transform.smoothscale(img, size)
         out.append(img)
@@ -524,15 +540,15 @@ def main():
     clock = pygame.time.Clock()
 
     # import assets
-    bg = pygame.image.load(BG_FILE).convert_alpha()
+    bg = pygame.image.load(resource_path(BG_FILE)).convert_alpha()
 
     pygame.mixer.init()
-    pygame.mixer.music.load(BGM_FILE)
+    pygame.mixer.music.load(resource_path(BGM_FILE))
     pygame.mixer.music.play(loops=-1)
 
     # --- window 1 --- #
-    start_title = pygame.image.load(START_TITLE_FILE).convert_alpha()
-    start_button_img = pygame.image.load(START_BUTTON_FILE).convert_alpha()
+    start_title = pygame.image.load(resource_path(START_TITLE_FILE)).convert_alpha()
+    start_button_img = pygame.image.load(resource_path(START_BUTTON_FILE)).convert_alpha()
     start_button_center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 140)
     btn_w, btn_h = start_button_img.get_size()
     btn_scale = 1.0
@@ -541,22 +557,22 @@ def main():
 
     # --- window 2&3 --- #
     # level signs 
-    level_label_l1 = pygame.image.load(LEVEL_LABEL_L1_FILE).convert_alpha()
-    level_label_l2 = pygame.image.load(LEVEL_LABEL_L2_FILE).convert_alpha()
+    level_label_l1 = pygame.image.load(resource_path(LEVEL_LABEL_L1_FILE)).convert_alpha()
+    level_label_l2 = pygame.image.load(resource_path(LEVEL_LABEL_L2_FILE)).convert_alpha()
 
     # stack box
-    stack_box_img = pygame.image.load(STACK_BOX_FILE).convert_alpha()
+    stack_box_img = pygame.image.load(resource_path(STACK_BOX_FILE)).convert_alpha()
 
     # tiles
     tile_images_l1 = load_images_scaled(TILE_IMG_FILES_L1, (TILE_WIDTH, TILE_HEIGHT))
     tile_images_l2 = load_images_scaled(TILE_IMG_FILES_L2, (TILE_WIDTH, TILE_HEIGHT))
 
     # trans board
-    trans_board = pygame.image.load(TRANS_BOARD_FILE).convert_alpha()
+    trans_board = pygame.image.load(resource_path(TRANS_BOARD_FILE)).convert_alpha()
 
     # --- window 4 --- #
     # restart button
-    restart_button_img = pygame.image.load(RESTART_BUTTON_FILE).convert_alpha()
+    restart_button_img = pygame.image.load(resource_path(RESTART_BUTTON_FILE)).convert_alpha()
     restart_btn_w, restart_btn_h = restart_button_img.get_size()
     restart_btn_scale = 1.0
 
@@ -790,7 +806,7 @@ def main():
 
         elif game_state == "end":
             # restart button
-            my, my = pygame.mouse.get_pos()
+            mx, my = pygame.mouse.get_pos()
             base_rect = restart_button_img.get_rect()
             base_rect.center = END_BUTTON_CENTER
 
@@ -818,9 +834,8 @@ def main():
 
     pygame.quit()
 
-if __name__ in "__main__":
+if __name__ == "__main__":
     main()
-
 
 
 
