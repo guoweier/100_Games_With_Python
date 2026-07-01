@@ -1,5 +1,11 @@
-import pygame, sys, random, math
+import pygame, sys, random, math, os
 from pygame.locals import *
+
+# get path for assets
+def load_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 ## PARAMETERS ##
 WINDOWWIDTH = 477
@@ -16,8 +22,8 @@ windowSurface = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT), 0, 32)
 pygame.display.set_caption('Flappybird')
 
 ## FONTS ##
-textfont = pygame.font.Font("font/Tiny5.ttf", 24)
-scorefont = pygame.font.Font("font/Micro5.ttf", 72)
+textfont = pygame.font.Font(load_path("font/Tiny5.ttf"), 24)
+scorefont = pygame.font.Font(load_path("font/Micro5.ttf"), 72)
 
 ## FUNCTION ##
 # ---------- basic functions ------------ #
@@ -33,7 +39,7 @@ def reset_game():
     score = 0
 
 def load_image(file, x, y):
-    img = pygame.image.load(file)
+    img = pygame.image.load(load_path(file))
     img = pygame.transform.scale(img, (x,y))
     return img
 

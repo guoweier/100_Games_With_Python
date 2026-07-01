@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>flappybird</string>
+	<key>CFBundleExecutable</key>
+	<string>flappybird</string>
+	<key>CFBundleIconFile</key>
+	<string>generated-ad185afd43435c3fb396321e936e94be0db310587fb6a27f530db0aa93c152b8.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>flappybird</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>flappybird</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.0.0</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+</dict>
+</plist>
