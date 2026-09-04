@@ -13,7 +13,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 
 
-BG = (20, 120, 50)
+BG = (33, 168, 72)
 WHITE = (245, 245, 245)
 BLACK = (20, 20, 20)
 RED = (200, 40, 40)
@@ -44,7 +44,7 @@ TABLEAU_Y = TOP_MARGIN + CARD_HEIGHT + 20
 TABLEAU_XS = [LEFT_MARGIN + i * (CARD_WIDTH + TABLEAU_GAP_X) for i in range(7)]
 
 FONT = pygame.font.SysFont("arial", 24)
-SMALL_FONT = pygame.font.SysFont("arial", 18)
+SMALL_FONT = pygame.font.Font("assets/font/solitaire_font_bold.ttf", 12)
 
 ASSETS_FOLDER = "assets"
 SUIT_FILE_NAMES = {
@@ -114,13 +114,67 @@ SELECTION_GAP = 2
 SELECTION_BORDER_WIDTH = 4
 SELECTION_COLOR = (0, 0, 175)
 
-OK_BUTTON_RECT = pygame.Rect(DECK_WINDOW_X + 360, DECK_WINDOW_Y + 440, 150, 46)
-CANCEL_BUTTON_RECT = pygame.Rect(DECK_WINDOW_X + 422, DECK_WINDOW_Y + 440, 150, 46)
+DECK_OK_BUTTON_RECT = pygame.Rect(DECK_WINDOW_X + 360, DECK_WINDOW_Y + 440, 150, 46)
+DECK_CANCEL_BUTTON_RECT = pygame.Rect(DECK_WINDOW_X + 522, DECK_WINDOW_Y + 440, 150, 46)
+DECK_OK_NORMAL_PATH = os.path.join(ASSETS_FOLDER, "ok1.png")
+DECK_OK_CLICKED_PATH = os.path.join(ASSETS_FOLDER, "ok2.png")
+DECK_CANCEL_NORMAL_PATH = os.path.join(ASSETS_FOLDER, "cancel1.png")
+DECK_CANCEL_CLICKED_PATH = os.path.join(ASSETS_FOLDER, "cancel2.png")
+
+DECK_CROSS_BUTTON_RECT = pygame.Rect(DECK_WINDOW_X + 658, DECK_WINDOW_Y + 10, 32, 28)
+DECK_CROSS_NORMAL_PATH = os.path.join(ASSETS_FOLDER, "cross1.png")
+DECK_CROSS_CLICKED_PATH = os.path.join(ASSETS_FOLDER, "cross2.png")
 
 DECK_WINDOW_PATH = os.path.join(ASSETS_FOLDER, "deck.png")
+CARD_FRONT_FOLDER = os.path.join(ASSETS_FOLDER, "card")
 CARD_BACK_FOLDER = os.path.join(ASSETS_FOLDER, "back")
 
-CARD_BACK_FILES = [f"back{i+1}.png" for i in range(12)]
+CARD_BACK_FILES = [f"back_{i+1}.png" for i in range(12)]
+
+FOUNDATION_PATH = os.path.join(ASSETS_FOLDER, "foundation.png")
+STOCK_PATH = os.path.join(ASSETS_FOLDER, "stock.png")
+
+#### Option Window ####
+OPTION_WINDOW_WIDTH = 684
+OPTION_WINDOW_HEIGHT = 438
+OPTION_WINDOW_X = (SCREEN_WIDTH - OPTION_WINDOW_WIDTH) // 2
+OPTION_WINDOW_Y = (SCREEN_HEIGHT - OPTION_WINDOW_HEIGHT) // 2
+
+OPTION_WINDOW_RECT = pygame.Rect(
+    OPTION_WINDOW_X,
+    OPTION_WINDOW_Y,
+    OPTION_WINDOW_WIDTH,
+    OPTION_WINDOW_HEIGHT
+)
+
+OPTION_OK_BUTTON_RECT = pygame.Rect(OPTION_WINDOW_X + 342, OPTION_WINDOW_Y + 360, 150, 46)
+OPTION_CANCEL_BUTTON_RECT = pygame.Rect(OPTION_WINDOW_X + 504, OPTION_WINDOW_Y + 360, 150, 46)
+OPTION_OK_NORMAL_PATH = os.path.join(ASSETS_FOLDER, "ok1.png")
+OPTION_OK_CLICKED_PATH = os.path.join(ASSETS_FOLDER, "ok2.png")
+OPTION_CANCEL_NORMAL_PATH = os.path.join(ASSETS_FOLDER, "cancel1.png")
+OPTION_CANCEL_CLICKED_PATH = os.path.join(ASSETS_FOLDER, "cancel2.png")
+
+OPTION_CROSS_BUTTON_RECT = pygame.Rect(OPTION_WINDOW_X + 642, OPTION_WINDOW_Y + 10, 32, 28)
+OPTION_CROSS_NORMAL_PATH = os.path.join(ASSETS_FOLDER, "cross1.png")
+OPTION_CROSS_CLICKED_PATH = os.path.join(ASSETS_FOLDER, "cross2.png")
+
+OPTION_WINDOW_PATH1 = os.path.join(ASSETS_FOLDER, "option1.png")
+OPTION_WINDOW_PATH2 = os.path.join(ASSETS_FOLDER, "option2.png")
+
+## Draw One/Three ##
+DRAW_ONE_CLICK_RECT = pygame.Rect(OPTION_WINDOW_X + 74, OPTION_WINDOW_Y + 130, 12, 12)
+DRAW_THREE_CLICK_RECT = pygame.Rect(OPTION_WINDOW_X + 74, OPTION_WINDOW_Y + 188, 12, 12)
+DRAW_ONE_DOT_POS = (OPTION_WINDOW_X + 76, OPTION_WINDOW_Y + 132)
+DRAW_THREE_DOT_POS = (OPTION_WINDOW_X + 76, OPTION_WINDOW_Y + 190)
+OPTION_DOT_SIZE = 8
+WASTE_CARD_OFFSET_X = 24
+OPTION_DOT_PATH = os.path.join(ASSETS_FOLDER, "option_dot.png")
+
+## Timed Game ##
+OPTION_CHECK_PATH = os.path.join(ASSETS_FOLDER, "option_check.png")
+TIMING_CLICK_RECT = pygame.Rect(OPTION_WINDOW_X + 34, OPTION_WINDOW_Y + 268, 18, 18)
+TIMING_CHECK_POS = (OPTION_WINDOW_X + 36, OPTION_WINDOW_Y + 270)
+
 
 
 
@@ -157,13 +211,22 @@ class Card:
 
 
 # --- FUNCTIONS --- #
+def load_slot_image(path):
+    try:
+        image = pygame.image.load(path).convert_alpha()
+    except (pygame.error, FileNotFoundError) as error:
+        raise RuntimeError (f"Could not load slot image: {path}") from error
+
+    return pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
+
+
 def load_card_images():
     images = {}
 
     for suit in SUITS:
         for rank in RANKS:
             filename = f"{SUIT_FILE_NAMES[suit]}{rank}.png"
-            path = os.path.join(ASSETS_FOLDER, filename)
+            path = os.path.join(CARD_FRONT_FOLDER, filename)
 
             image = pygame.image.load(path).convert_alpha()
             image = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
@@ -195,6 +258,16 @@ def load_deck_window_image():
     
     return pygame.transform.scale(image, (DECK_WINDOW_WIDTH, DECK_WINDOW_HEIGHT))
 
+
+def load_button_image(path, button_w, button_h):
+    try:
+        image = pygame.image.load(path).convert_alpha()
+    except (pygame.error, FileNotFoundError) as error:
+        raise RuntimeError(f"Cound not load button image: {path}") from error
+
+    return pygame.transform.scale(image, (button_w, button_h))
+    
+
 def get_deck_thumbnail_rect(index):
     row = index // DECK_COLUMNS
     column = index % DECK_COLUMNS
@@ -217,6 +290,14 @@ def draw_selected_deck_outline(selected_index):
     outline_rect = thumbnail_rect.inflate(total_extension * 2, total_extension * 2)
     pygame.draw.rect(screen, SELECTION_COLOR, outline_rect, width=SELECTION_BORDER_WIDTH)
 
+def load_option_window_image():
+    try:
+        image = pygame.image.load(OPTION_WINDOW_PATH1).convert_alpha()
+    except (pygame.error, FileNotFoundError) as error:
+        raise RuntimeError(f"Could not load option window: {OPTION_WINDOW_PATH1}") from error
+    return pygame.transform.scale(image, (OPTION_WINDOW_WIDTH, OPTION_WINDOW_HEIGHT))
+
+
 def get_game_menu_item_rect(index):
     return pygame.Rect(DROPDOWN_X, DROPDOWN_Y + index * DROPDOWN_ITEM_HEIGHT, DROPDOWN_WIDTH, DROPDOWN_ITEM_HEIGHT)
 
@@ -238,8 +319,8 @@ def draw_menu_bar(game_menu_open):
         pygame.draw.rect(screen, MENU_HOVER, HELP_BUTTON_RECT)
     game_text = SMALL_FONT.render("Game", True, MENU_TEXT)
     help_text = SMALL_FONT.render("Help", True, MENU_TEXT)
-    screen.blit(game_text, (GAME_BUTTON_RECT.x + 10, GAME_BUTTON_RECT.centery - game_text.get_height() // 2))
-    screen.blit(help_text, (HELP_BUTTON_RECT.x + 10, HELP_BUTTON_RECT.centery - help_text.get_height() // 2))
+    screen.blit(game_text, (GAME_BUTTON_RECT.x + 10, GAME_BUTTON_RECT.centery - game_text.get_height() // 2 + 3))
+    screen.blit(help_text, (HELP_BUTTON_RECT.x + 10, HELP_BUTTON_RECT.centery - help_text.get_height() // 2 + 3))
     if game_menu_open:
         draw_game_dropdown()
 
@@ -254,14 +335,94 @@ def draw_game_dropdown():
         if item_rect.collidepoint(mouse_pos):
             pygame.draw.rect(screen, MENU_HOVER, item_rect)
         item_text = SMALL_FONT.render(item, True, MENU_TEXT)
-        screen.blit(item_text, (item_rect.x + 12, item_rect.centery - item_text.get_height() // 2))
+        screen.blit(item_text, (item_rect.x + 12, item_rect.centery - item_text.get_height() // 2 + 3))
 
-def draw_deck_window(pending_back_index):
+## deck window ##
+def draw_deck_buttons(pressed_deck_button):
+    mouse_pos = pygame.mouse.get_pos()
+    ok_is_pressed = pressed_deck_button == "ok" and DECK_OK_BUTTON_RECT.collidepoint(mouse_pos)
+    cancel_is_pressed = pressed_deck_button == "cancel" and DECK_CANCEL_BUTTON_RECT.collidepoint(mouse_pos)
+    cross_is_pressed = pressed_deck_button == "cross" and DECK_CROSS_BUTTON_RECT.collidepoint(mouse_pos)
+    ok_image = DECK_OK_CLICKED_IMAGE if ok_is_pressed else DECK_OK_NORMAL_IMAGE
+    cancel_image = DECK_CANCEL_CLICKED_IMAGE if cancel_is_pressed else DECK_CANCEL_NORMAL_IMAGE
+    cross_image = DECK_CROSS_CLICKED_IMAGE if cross_is_pressed else DECK_CROSS_NORMAL_IMAGE
+
+    screen.blit(ok_image, DECK_OK_BUTTON_RECT.topleft)
+    screen.blit(cancel_image, DECK_CANCEL_BUTTON_RECT.topleft)
+    screen.blit(cross_image, DECK_CROSS_BUTTON_RECT.topleft)
+
+def draw_deck_window(pending_back_index, pressed_deck_button):
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 110))
     screen.blit(overlay, (0, 0))
     screen.blit(DECK_WINDOW_IMAGE, (DECK_WINDOW_X, DECK_WINDOW_Y))
     draw_selected_deck_outline(pending_back_index)
+    draw_deck_buttons(pressed_deck_button)
+
+## option window ##
+def draw_option_buttons(pressed_option_button):
+    mouse_pos = pygame.mouse.get_pos()
+    ok_pressed = pressed_option_button == "ok" and OPTION_OK_BUTTON_RECT.collidepoint(mouse_pos)
+    cancel_pressed = pressed_option_button == "cancel" and OPTION_CANCEL_BUTTON_RECT.collidepoint(mouse_pos)
+    cross_pressed = pressed_option_button == "cross" and OPTION_CROSS_BUTTON_RECT.collidepoint(mouse_pos)
+    ok_image = OPTION_OK_CLICKED_IMAGE if ok_pressed else OPTION_OK_NORMAL_IMAGE
+    cancel_image = OPTION_CANCEL_CLICKED_IMAGE if cancel_pressed else OPTION_CANCEL_NORMAL_IMAGE
+    cross_image = OPTION_CROSS_CLICKED_IMAGE if cross_pressed else OPTION_CROSS_NORMAL_IMAGE
+
+    screen.blit(ok_image, OPTION_OK_BUTTON_RECT.topleft)
+    screen.blit(cancel_image, OPTION_CANCEL_BUTTON_RECT.topleft)
+    screen.blit(cross_image, OPTION_CROSS_BUTTON_RECT.topleft)
+
+def draw_draw_count_option(pending_draw_count):
+    if pending_draw_count == 1:
+        dot_pos = DRAW_ONE_DOT_POS
+    elif pending_draw_count == 3:
+        dot_pos = DRAW_THREE_DOT_POS
+    else:
+        return
+    screen.blit(OPTION_DOT_IMAGE, dot_pos)
+
+def start_timer(timer_started, timer_running, timer_segment_start):
+    if not timer_started:
+        timer_started = True
+        timer_running = True
+        timer_segment_start = pygame.time.get_ticks()
+    return (timer_started, timer_running, timer_segment_start)
+
+def pause_timer(timer_started, timer_running, timer_accumulated_ms, timer_segment_start):
+    if timer_started and timer_running:
+        now = pygame.time.get_ticks()
+        timer_accumulated_ms += now - timer_segment_start
+        timer_running = False
+    return (timer_running, timer_accumulated_ms)
+
+def resume_timer(timer_started, timer_running, timer_segment_start):
+    if timer_started and not timer_running:
+        timer_running = True
+        timer_segment_start = pygame.time.get_ticks()
+    return (timer_running, timer_segment_start)
+
+def get_elapsed_seconds(timer_started, timer_running, timer_accumulated_ms, timer_segment_start):
+    if not timer_started:
+        return 0
+    total_ms = timer_accumulated_ms
+    if timer_running:
+        total_ms += pygame.time.get_ticks() - timer_segment_start
+    return total_ms // 1000
+
+
+def draw_option_window(pressed_option_button, pending_draw_count, pending_show_timing):
+    overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 110))
+    screen.blit(overlay, (0, 0))
+    screen.blit(OPTION_WINDOW_IMAGE, (OPTION_WINDOW_X, OPTION_WINDOW_Y))
+    # draw 1/3
+    draw_draw_count_option(pending_draw_count)
+    # timer
+    if pending_show_timing:
+        screen.blit(OPTION_CHECK_IMAGE, TIMING_CHECK_POS)
+    # ok and cancel buttons
+    draw_option_buttons(pressed_option_button)
 
 
 def create_deck():
@@ -347,15 +508,27 @@ def get_tableau_column_at_pos(mouse_pos):
 def stock_rect():
     return pygame.Rect(STOCK_POS[0], STOCK_POS[1], CARD_WIDTH, CARD_HEIGHT)
 
-def waste_rect():
-    return pygame.Rect(WASTE_POS[0], WASTE_POS[1], CARD_WIDTH, CARD_HEIGHT)
+def waste_rect(waste, draw_count, waste_visible_count):
+    if not waste:
+        return pygame.Rect(WASTE_POS[0], WASTE_POS[1], CARD_WIDTH, CARD_HEIGHT)
+    # draw one
+    if draw_count == 1:
+        visible_count = 1
+    # draw three
+    else:
+        visible_count = min(waste_visible_count, len(waste))
+    if visible_count <= 0:
+        return pygame.Rect(WASTE_POS[0], WASTE_POS[1], 0, 0)
+    x = WASTE_POS[0] + (visible_count - 1) * WASTE_CARD_OFFSET_X
+    return pygame.Rect(x, WASTE_POS[1], CARD_WIDTH, CARD_HEIGHT)
 
 
 def recycle_waste_to_stock(stock, waste):
     while waste:
         card = waste.pop()
         card.face_up = False
-        stock.insert(0, card)
+        #stock.insert(0, card)
+        stock.append(card)
 
 def draw_empty_slot(x, y, label=""):
     rect = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
@@ -415,23 +588,49 @@ def try_drop_drag(tableau, foundations, waste, drag_info, mouse_pos):
     
     return False
 
+def draw_waste(waste, draw_count, waste_visible_count, current_back_index):
+    if not waste:
+        return
 
-def draw_game(tableau, foundations, stock, waste, drag_info, current_back_index, pending_back_index, game_menu_open, deck_window_open):
+    # draw one
+    if draw_count == 1:
+        waste[-1].draw(screen, WASTE_POS[0], WASTE_POS[1], current_back_index)
+        return
+    # draw three
+    if waste_visible_count <= 0:
+        return
+    
+    visible_count = min(waste_visible_count, len(waste))
+    visible_cards = waste[-visible_count:]
+    for index, card in enumerate(visible_cards):
+        x = WASTE_POS[0] + index * WASTE_CARD_OFFSET_X
+        y = WASTE_POS[1]
+        card.draw(screen, x, y, current_back_index)
+
+def draw_timer(show_timing, elapsed_time):
+    if not show_timing:
+        return
+    timer_text = SMALL_FONT.render(f"Time: {elapsed_time}", True, (0,0,0))
+    timer_rect = timer_text.get_rect()
+    timer_rect.bottomright = (SCREEN_WIDTH - 15, SCREEN_HEIGHT - 10)
+    screen.blit(timer_text, timer_rect)
+
+
+def draw_game(tableau, foundations, stock, waste, drag_info, 
+              current_back_index, pending_back_index, 
+              game_menu_open, deck_window_open, pressed_deck_button, option_window_open, pressed_option_button, 
+              draw_count, pending_draw_count, waste_visible_count,
+              show_timing, elapsed_time, pending_show_timing):
     screen.fill(BG)
 
     # stock
     if stock:
         screen.blit(CARD_BACK_IMAGES[current_back_index], STOCK_POS)
-        #pygame.draw.rect(screen, (30,60,140), stock_rect(), border_radius=8)
-        #pygame.draw.rect(screen, BLACK, stock_rect(), 2, border_radius=8)
     else:
-        draw_empty_slot(STOCK_POS[0], STOCK_POS[1], "Stock")
+        screen.blit(STOCK_IMAGE, STOCK_POS)
 
     # waste
-    if waste:
-        waste[-1].draw(screen, *WASTE_POS, current_back_index, selected=False)
-    else:
-        draw_empty_slot(*WASTE_POS, "Waste")
+    draw_waste(waste, draw_count, waste_visible_count, current_back_index)
 
     # foundation
     for i in range(4):
@@ -439,14 +638,12 @@ def draw_game(tableau, foundations, stock, waste, drag_info, current_back_index,
         if foundations[i]:
             foundations[i][-1].draw(screen, x, y, current_back_index, selected=False)
         else:
-            draw_empty_slot(x,y, "1")
+            screen.blit(FOUNDATION_IMAGE, (x,y))
 
     # tableau
     positions = get_card_draw_positions(tableau)
     for col_idx, column in enumerate(tableau):
         x = TABLEAU_XS[col_idx]
-        if not column:
-            draw_empty_slot(x, TABLEAU_Y, "K")
         for card in column:
             cx, cy = positions[card]
             card.draw(screen, cx, cy, current_back_index, selected=False)
@@ -466,28 +663,83 @@ def draw_game(tableau, foundations, stock, waste, drag_info, current_back_index,
         text = FONT.render("You Win!", True, GOLD)
         screen.blit(text, (SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2))
 
+    # draw timer
+    draw_timer(show_timing, elapsed_time)
+
     # draw menu bar
     draw_menu_bar(game_menu_open)
     if deck_window_open:
-        draw_deck_window(pending_back_index)
+        draw_deck_window(pending_back_index, pressed_deck_button)
+    if option_window_open:
+        draw_option_window(pressed_option_button, pending_draw_count, pending_show_timing)
 
     pygame.display.flip()
 
+def restart_game():
+    tableau, foundations, stock, waste = deal_new_game()
+    waste_visible_count = 0
+    drag_info = None
 
-# load card front and back images
+    timer_started = False
+    timer_running = False
+    timer_accumulated_ms = 0
+    timer_segment_start = 0
+    return (tableau, foundations, stock, waste, waste_visible_count, drag_info, timer_started, timer_running, timer_accumulated_ms, timer_segment_start)
+
+
+
+
+#### LOAD IMAGES ####
 CARD_IMAGES = load_card_images()
 CARD_BACK_IMAGES = load_card_back_images()
+FOUNDATION_IMAGE = load_slot_image(FOUNDATION_PATH)
+STOCK_IMAGE = load_slot_image(STOCK_PATH)
+## deck window ##
 DECK_WINDOW_IMAGE = load_deck_window_image()
+DECK_OK_NORMAL_IMAGE = load_button_image(DECK_OK_NORMAL_PATH, 150, 46)
+DECK_OK_CLICKED_IMAGE = load_button_image(DECK_OK_CLICKED_PATH, 150, 46)
+DECK_CANCEL_NORMAL_IMAGE = load_button_image(DECK_CANCEL_NORMAL_PATH, 150, 46)
+DECK_CANCEL_CLICKED_IMAGE = load_button_image(DECK_CANCEL_CLICKED_PATH, 150, 46)
+DECK_CROSS_NORMAL_IMAGE = load_button_image(DECK_CROSS_NORMAL_PATH, 32, 28)
+DECK_CROSS_CLICKED_IMAGE = load_button_image(DECK_CROSS_CLICKED_PATH, 32, 28)
+## option window ##
+OPTION_WINDOW_IMAGE = load_option_window_image()
+OPTION_OK_NORMAL_IMAGE = load_button_image(OPTION_OK_NORMAL_PATH, 150, 46)
+OPTION_OK_CLICKED_IMAGE = load_button_image(OPTION_OK_CLICKED_PATH, 150, 46)
+OPTION_CANCEL_NORMAL_IMAGE = load_button_image(OPTION_CANCEL_NORMAL_PATH, 150, 46)
+OPTION_CANCEL_CLICKED_IMAGE = load_button_image(OPTION_CANCEL_CLICKED_PATH, 150, 46)
+OPTION_CROSS_NORMAL_IMAGE = load_button_image(OPTION_CROSS_NORMAL_PATH, 32, 28)
+OPTION_CROSS_CLICKED_IMAGE = load_button_image(OPTION_CROSS_CLICKED_PATH, 32, 28)
+OPTION_DOT_IMAGE = load_button_image(OPTION_DOT_PATH, 8, 8)
+OPTION_CHECK_IMAGE = load_button_image(OPTION_CHECK_PATH, 14, 14)
+
 
 # --- MAIN --- #
 def main():
-    tableau, foundations, stock, waste = deal_new_game()
+    (tableau, foundations, stock, waste, waste_visible_count, drag_info, timer_started, timer_running, timer_accumulated_ms, timer_segment_start) = restart_game()
     drag_info = None
 
     game_menu_open = False
     deck_window_open = False
+    option_window_open = False
+
     current_back_index = 0
     pending_back_index = 0
+
+    pressed_deck_button = None
+    pressed_option_button = None 
+
+    # draw 1/3
+    draw_count = 1
+    pending_draw_count = 1
+
+    # timing
+    show_timing = True
+    pending_show_timing = True
+    timer_started = False
+    timer_accumulated_ms = 0
+    timer_segment_start = 0
+
     
     while True:
         clock.tick(60)
@@ -512,22 +764,58 @@ def main():
                     if clicked_thumbnail is not None:
                         pending_back_index = clicked_thumbnail
                         continue
-                    if OK_BUTTON_RECT.collidepoint(mouse_pos):
-                        current_back_index = pending_back_index
-                        deck_window_open = False
+
+                    if DECK_OK_BUTTON_RECT.collidepoint(mouse_pos):
+                        pressed_deck_button = "ok"
                         continue 
 
-                    if CANCEL_BUTTON_RECT.collidepoint(mouse_pos):
-                        pending_back_index = current_back_index
-                        deck_window_open = False
+                    if DECK_CANCEL_BUTTON_RECT.collidepoint(mouse_pos):
+                        pressed_deck_button = "cancel"
                         continue
+
+                    if DECK_CROSS_BUTTON_RECT.collidepoint(mouse_pos):
+                        pressed_deck_button = "cross"
+                        continue
+
                     continue
 
-                # 2. handle opened game dropdown
+                # 2. option window
+                if option_window_open:
+                    # draw one/three
+                    if DRAW_ONE_CLICK_RECT.collidepoint(mouse_pos):
+                        pending_draw_count = 1
+                        continue
+
+                    if DRAW_THREE_CLICK_RECT.collidepoint(mouse_pos):
+                        pending_draw_count = 3
+                        continue
+
+                    # timer
+                    if TIMING_CLICK_RECT.collidepoint(mouse_pos):
+                        pending_show_timing = not pending_show_timing
+                        continue
+
+                    # ok/cancel/cross
+                    if OPTION_OK_BUTTON_RECT.collidepoint(mouse_pos):
+                        pressed_option_button = "ok"
+                        continue
+
+                    if OPTION_CANCEL_BUTTON_RECT.collidepoint(mouse_pos):
+                        pressed_option_button = "cancel"
+                        continue
+                    
+                    if OPTION_CROSS_BUTTON_RECT.collidepoint(mouse_pos):
+                        pressed_option_button = "cross"
+                        continue
+                    # click the option circles
+                    # prevent clicks from reaching the solitaire game
+                    continue
+
+                # 3. handle opened game dropdown
                 if game_menu_open:
                     selected_item = get_game_menu_item_at_pos(mouse_pos)
                     if selected_item == "Deal":
-                        tableau, foundations, stock, waste = deal_new_game()
+                        (tableau, foundations, stock, waste, waste_visible_count, drag_info, timer_started, timer_running, timer_accumulated_ms, timer_segment_start) = restart_game()
                         drag_info = None
                         game_menu_open = False
                         continue
@@ -539,13 +827,23 @@ def main():
 
                     elif selected_item == "Deck":
                         pending_back_index = current_back_index
+                        # pause timer
+                        (timer_running, timer_accumulated_ms) = pause_timer(timer_started, timer_running, timer_accumulated_ms, timer_segment_start)
+                        pressed_deck_button = None
                         deck_window_open = True
                         game_menu_open = False
                         continue
 
                     elif selected_item == "Options":
-                        print("Options is not implemented yet")
+                        pending_draw_count = draw_count
+                        pending_show_timing = show_timing
+                        # pause timer before opening modal
+                        (timer_running, timer_accumulated_ms) = pause_timer(timer_started, timer_running, timer_accumulated_ms, timer_segment_start)
+
+                        option_window_open = True
+                        pressed_option_button = None
                         game_menu_open = False
+                        drag_info = None
                         continue
 
                     elif selected_item == "Exit":
@@ -560,7 +858,7 @@ def main():
                     #game_menu_open = False
                     continue
 
-                # 3. handle the top bar
+                # 4. handle the top bar
                 if GAME_BUTTON_RECT.collidepoint(mouse_pos):
                     game_menu_open = True
                     drag_info = None
@@ -575,7 +873,7 @@ def main():
                     continue
 
 
-                # 4. click to flip top card
+                # 5. click to flip top card
                 hit = get_tableau_card_at_pos(tableau, mouse_pos)
                 if hit: 
                     col_idx, card_idx, card = hit
@@ -586,28 +884,44 @@ def main():
                 # click stock
                 if stock_rect().collidepoint(mouse_pos):
                     if stock:
-                        card = stock.pop()
-                        card.face_up = True
-                        waste.append(card)
+                        number_to_draw = min(draw_count, len(stock))
+                        for _ in range(number_to_draw):
+                            card = stock.pop()
+                            card.face_up = True
+                            waste.append(card)
+                        waste_visible_count = number_to_draw
+                        # first action
+                        if not timer_started:
+                            (timer_started, timer_running_timer_segment_start) = start_timer(timer_started, timer_running, timer_segment_start)
                     else:
                         recycle_waste_to_stock(stock, waste)
+                        waste_visible_count = 0
                 
                 # drag from waste
-                if waste_rect().collidepoint(mouse_pos) and waste:
+                if waste_rect(waste, draw_count, waste_visible_count).collidepoint(mouse_pos) and waste:
                     card = waste[-1]
+                    top_waste_rect = waste_rect(waste, draw_count, waste_visible_count)
+                    card_x = top_waste_rect.x
+                    card_y = top_waste_rect.y
                     mouse_x, mouse_y = mouse_pos
-                    offset_x = mouse_x - WASTE_POS[0]
-                    offset_y = mouse_y - WASTE_POS[1]
 
                     drag_info = {
                         "cards": [card],
-                        "source": ["waste"],
-                        "offset_x": offset_x,
-                        "offset_y": offset_y,
-                        "draw_x": WASTE_POS[0],
-                        "draw_y": WASTE_POS[1]
+                        "source": ("waste",),
+                        "offset_x": mouse_x - card_x,
+                        "offset_y": mouse_y - card_y,
+                        "draw_x": card_x,
+                        "draw_y": card_y,
+                        "old_waste_visible_count": waste_visible_count
                     }
-                    remove_drag_card(tableau, waste, drag_info)
+                    #remove_drag_card(tableau, waste, drag_info)
+                    waste.pop()
+                    if draw_count == 3:
+                        waste_visible_count -= 1
+                        # if last card of visible group, reveal one card beneath
+                        if waste_visible_count == 0 and len(waste) > 0:
+                            waste_visible_count = 1
+
 
                 if hit:
                     col_idx, card_idx, card = hit
@@ -630,22 +944,98 @@ def main():
                         continue
             
             elif event.type == pygame.MOUSEMOTION:
-                if drag_info is not None and not game_menu_open and not deck_window_open:
+                if drag_info is not None and not game_menu_open and not deck_window_open and not option_window_open:
                     mx, my = event.pos
                     drag_info["draw_x"] = mx - drag_info["offset_x"]
                     drag_info["draw_y"] = my - drag_info["offset_y"]
 
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                if drag_info is not None and not game_menu_open and not deck_window_open:
+                mouse_pos = event.pos
+
+                # deck window mouse up
+                if deck_window_open:
+                    if pressed_deck_button == "ok" and DECK_OK_BUTTON_RECT.collidepoint(mouse_pos):
+                        current_back_index = pending_back_index
+                        (timer_running, timer_segment_start) = resume_timer(timer_started, timer_running, timer_segment_start)
+                        deck_window_open = False
+                    elif pressed_deck_button == "cancel" and DECK_CANCEL_BUTTON_RECT.collidepoint(mouse_pos):
+                        pending_back_index = current_back_index
+                        (timer_running, timer_segment_start) = resume_timer(timer_started, timer_running, timer_segment_start)
+                        deck_window_open = False
+                    elif pressed_deck_button == "cross" and DECK_CROSS_BUTTON_RECT.collidepoint(mouse_pos):
+                        pending_back_index = current_back_index
+                        (timer_running, timer_segment_start) = resume_timer(timer_started, timer_running, timer_segment_start)
+                        deck_window_open = False
+
+                    pressed_deck_button = None
+                    continue
+
+                # option window mouse down
+                if option_window_open:
+                    if pressed_option_button == "ok" and OPTION_OK_BUTTON_RECT.collidepoint(mouse_pos):
+                        # draw 1/3
+                        draw_mode_changed = pending_draw_count != draw_count
+                        draw_count = pending_draw_count
+                        # timer
+                        show_timing = pending_show_timing
+
+                        # if draw 1/3 changed, start new game
+                        if draw_mode_changed:
+                            (tableau, foundations, stock, waste, waste_visible_count, drag_info, timer_started, timer_running, timer_accumulated_ms, timer_segment_start) = restart_game()
+                        # reset timer state
+                        else:
+                            (timer_running, timer_segment_start) = resume_timer(timer_started, timer_running, timer_segment_start)
+
+                        option_window_open = False
+
+                    elif pressed_option_button == "cancel" and OPTION_CANCEL_BUTTON_RECT.collidepoint(mouse_pos):
+                        pending_draw_count = draw_count
+                        pending_show_timing = show_timing
+                        (timer_running, timer_segment_start) = resume_timer(timer_started, timer_running, timer_segment_start)
+                        option_window_open = False
+
+                    elif pressed_option_button == "cross" and OPTION_CROSS_BUTTON_RECT.collidepoint(mouse_pos):
+                        pending_draw_count = draw_count
+                        pending_show_timing = show_timing
+                        (timer_running, timer_segment_start) = resume_timer(timer_started, timer_running, timer_segment_start)
+                        option_window_open = False
+                
+                    pressed_option_button = None
+                    continue
+                    
+
+                if drag_info is not None and not game_menu_open and not deck_window_open and not option_window_open:
                     dropped = try_drop_drag(tableau, foundations, waste, drag_info, event.pos)
+                    source = drag_info["source"]
 
                     if not dropped:
-                        restore_drag_cards(tableau, waste, drag_info)
+                        if source[0] == "waste":
+                            waste.append(drag_info["cards"][0])
+                            waste_visible_count = drag_info["old_waste_visible_count"]
+                        else:
+                            restore_drag_cards(tableau, waste, drag_info)
+                    else:
+                        # timer
+                        if not timer_started:
+                            (timer_started, timer_running, timer_segment_start) = start_timer(timer_started, timer_running, timer_segment_start)
+                            timer_started = True
+                            timer_started_ticks = pygame.time.get_ticks()
+                        # draw 1/3
+                        if source[0] == "waste" and draw_count == 3:
+                            if waste_visible_count == 0:
+                                waste_visible_count = min(3, len(waste))
+                        
 
                     drag_info = None
 
-                    
-        draw_game(tableau, foundations, stock, waste, drag_info, current_back_index, pending_back_index, game_menu_open, deck_window_open)
+        # timer
+        elapsed_time = get_elapsed_seconds(timer_started, timer_running, timer_accumulated_ms, timer_segment_start)
+        
+        draw_game(tableau, foundations, stock, waste, drag_info, 
+                  current_back_index, pending_back_index, 
+                  game_menu_open, deck_window_open, pressed_deck_button, option_window_open, pressed_option_button, 
+                  draw_count, pending_draw_count, waste_visible_count,
+                  show_timing, elapsed_time, pending_show_timing)
 
 
 
